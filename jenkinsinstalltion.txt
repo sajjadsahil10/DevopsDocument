@@ -12,4 +12,5 @@ sudo apt install jenkins -y
 
 /var/lib/jenkins
 
-admin/admin123
+admin/admin123 Jenkins and nexus
+admin/Darbhanga@1996 - sonar
