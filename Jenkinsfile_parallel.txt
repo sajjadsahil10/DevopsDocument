@@ -1,0 +1,73 @@
+pipeline {
+    agent any
+
+    environment {
+        // Using the credentials helper to inject a secret
+        SCANNER_AUTH = credentials('sonar-token-id')
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Compiling the application...'
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Quality & Testing') {
+            // failFast: If one parallel branch fails, stop the others immediately
+            failFast true
+            parallel {
+                stage('Static Analysis') {
+                    steps {
+                        echo "Running SonarQube with token..."
+                        // Using the environment variable from credentials helper
+                        sh "mvn sonar:sonar -Dsonar.login=${SCANNER_AUTH}"
+                    }
+                }
+
+                stage('Unit Tests') {
+                    steps {
+                        sh 'mvn test'
+                    }
+                }
+
+                stage('Integration Tests') {
+                    steps {
+                        // catchError: Allows the stage to fail without failing the whole pipeline
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                            sh './scripts/run-integration-tests.sh'
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            // 'when' block: Conditional execution without scripted 'if' statements
+            when {
+                branch 'main'
+            }
+            steps {
+                echo 'Deploying to Production...'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Archiving test results and cleaning workspace...'
+            junit '**/target/surefire-reports/*.xml'
+            cleanWs() 
+        }
+        
+        failure {
+            echo 'The pipeline failed. Sending a notification to the DevOps team.'
+            // Example: slackSend channel: '#ops-alerts', message: "FAILED: ${env.JOB_NAME}"
+        }
+
+        unstable {
+            echo 'Tests failed, but the build finished. Please review test reports.'
+        }
+    }
+}
