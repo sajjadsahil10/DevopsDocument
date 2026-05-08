@@ -1,0 +1,32 @@
+---
+- name: Install mariadb server
+  hosts: db01
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: Install mariadb
+      yum:
+        name: mariadb-server
+        state: present
+    - name: install pymysql
+      yum:
+        name: python3-PyMySQL
+        state: present
+    - name: Start mariadb service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: create a new databse with name "accounts"
+      community.mysql.mysql_db:
+        name: accounts
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+    - name: create a new user with name "vprofile"
+      community.mysql.mysql_user:
+        name: vprofile
+        password: vprofile123
+        priv: '*.*:ALL'
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock

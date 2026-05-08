@@ -1,0 +1,2 @@
+ansible web* -m ansible.builtin.yum -a "name=httpd state=present" -i inventory --become
+ansible web* -m ansible.builtin.service -a "name=httpd state=started enabled=yes" -i inventory --become

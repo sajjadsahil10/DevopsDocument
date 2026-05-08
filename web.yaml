@@ -1,0 +1,20 @@
+---
+- name: Install httpd server
+  hosts: web*
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: Install httpd
+      yum:
+        name: httpd
+        state: present
+    - name: Start httpd service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+    - name: copy index.html
+      copy:
+        src: files/index.html
+        dest: /var/www/html/index.html
