@@ -4,6 +4,9 @@
   become: yes
   vars:
     ansible_python_interpreter: /usr/bin/python3
+    dbname: electric
+    dbuser: current
+    dbpass: tesla
   tasks:
     - name: Install mariadb
       yum:
@@ -20,13 +23,13 @@
         enabled: yes
     - name: create a new databse with name "accounts"
       community.mysql.mysql_db:
-        name: accounts
+        name: "{{dbname}}"
         state: present
         login_unix_socket: /var/lib/mysql/mysql.sock
     - name: create a new user with name "vprofile"
       community.mysql.mysql_user:
-        name: vprofile
-        password: vprofile123
+        name: "{{dbuser}}"
+        password: "{{dbpass}}"
         priv: '*.*:ALL'
         state: present
         login_unix_socket: /var/lib/mysql/mysql.sock

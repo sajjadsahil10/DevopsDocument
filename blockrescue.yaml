@@ -1,0 +1,31 @@
+- name: Database Maintenance Playbook
+  hosts: db_servers
+  become: yes
+  tasks:
+    - name: Attempt risky database operations
+      block:
+        - name: Create a lock file
+          ansible.builtin.file:
+            path: /tmp/db.lock
+            state: touch
+
+        - name: Run database backup script
+          ansible.builtin.command: /usr/local/bin/backup_db.sh
+          # If this script fails, Ansible jumps to 'rescue'
+
+        - name: Update database schema
+          ansible.builtin.command: /usr/local/bin/update_schema.sh
+
+      rescue:
+        - name: Log the failure
+          ansible.builtin.debug:
+            msg: "The backup or update failed! Triggering rollback procedures..."
+
+        - name: Run rollback script
+          ansible.builtin.command: /usr/local/bin/rollback_db.sh
+
+      always:
+        - name: Ensure the lock file is ALWAYS removed
+          ansible.builtin.file:
+            path: /tmp/db.lock
+            state: absent
