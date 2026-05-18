@@ -1,0 +1,4 @@
+Q9. How would you debug a Pod that is stuck in CrashLoopBackOff?
+Work through this sequence: first kubectl describe pod <name> — 
+check the last state's exit code (137 = OOMKilled, 
+1 = app error, 2 = misuse), check events for image pull failures or mount errors. Then kubectl logs <pod> --previous to get the last run's stdout/stderr. If logs are empty (crashed before writing), use an init container or ephemeral debug container (kubectl debug) to inspect the filesystem. Check resource limits — OOMKilled with a low memory limit is the most common cause. Check liveness probe config — too aggressive probes restart a healthy-but-slow container. Check for missing ConfigMaps, Secrets, or volumes that prevent startup. As a last resort, change the command to sleep infinity to get a shell inside and run the app manually.

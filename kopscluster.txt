@@ -1,0 +1,13 @@
+kops create cluster --name=kubevpro.hmzsd.xyz --state=s3://kopsbucket25 --zones=us-east-1a,us-east-1b --node-count=2 --node-size=t3.small --control-plane-size=t3.medium --dns-zone=kubevpro.hmzsd.xyz --node-volume-size=12 --control-plane-volume-size=12 --ssh-public-key ~/.ssh/id_ed25519.pub
+
+kops update cluster --name=kubevpro.hmzsd.xyz --state=s3://kopsbucket25 --yes --admin
+
+kops validate cluster --name=kubevpro.hmzsd.xyz --state=s3://kopsbucket25
+
+kops delete cluster --name=kubevpro.hmzsd.xyz --state=s3://kopsbucket25 --yes
+
+kopsadmin
+AKIAVA5YKYJNW5XHZQVV
+
+
+snap install aws-cli --classic
